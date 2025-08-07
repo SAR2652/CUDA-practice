@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <cuda.h> 
 
-#define CHECK_CUDA(call)
-{
+#define CHECK_CUDA(call) {
     cudaError_t err = call;
     if (err != cudaSuccess)
     {
