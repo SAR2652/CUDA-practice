@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <cuda.h> 
 
-#define CHECK_CUDA(call) {
-    cudaError_t err = call;
-    if (err != cudaSuccess)
-    {
-        printf("CUDA Error: %s (at %s:%d)\n", cudaGetErrorString(err),
-        __FILE__, __LINE__);
-        return -1;
-    }
+#define CHECK_CUDA(call) { \
+    cudaError_t err = call; \
+    if (err != cudaSuccess) \
+    { \
+        printf("CUDA Error: %s (at %s:%d)\n", cudaGetErrorString(err), \
+        __FILE__, __LINE__); \
+        return -1; \
+    } \
 }
 
 __global__ void debug_kernel() {
