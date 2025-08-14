@@ -101,7 +101,7 @@ int main()
     // rows when moving along the Y-axis. 
     // X-axis: ()
 
-    matmul<<<gridDim, blockDim>>(d_M, d_N, d_P, M, N, K);
+    matmul<<<gridDim, blockDim>>>(d_M, d_N, d_P, M, N, K);
     cudaDeviceSynchronize();
 
     CHECK_CUDA(cudaFree(d_M));
