@@ -47,7 +47,7 @@ int main() {
 
     CHECK_CUDA(cudaMemcpy(c, d_c, n * sizeof(int), cudaMemcpyDeviceToHost));
 
-    for (int i = 0; i < n; i++) {
+    for(int i = 0; i < n; i++) {
         printf("%d + %d = %d\n", a[i], b[i], c[i]);
     }
 
