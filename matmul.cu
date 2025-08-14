@@ -114,5 +114,6 @@ int main()
     cudaMemcpy(h_P, d_P, P_size, cudaMemcpyDeviceToHost);
     CHECK_CUDA(cudaFree(d_P));
     free(h_P);
+    printf("Executed without error!");
 
 }
