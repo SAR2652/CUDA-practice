@@ -17,20 +17,20 @@ __global__ void matmul(float* d_M, float* d_N, float* d_P, int M, int N,
 
     for(int t = 0; t < Kdim; t++)
     {
-        Kcol = t * TILE_SIZE + threadIdx.x; 
+        int Kcol = t * TILE_SIZE + threadIdx.x; 
         if(alongRow < M && Kcol < K)
         {
-            tileA[threadIdx.y][threadIdx.x] = d_M[row * K + Kcol];
+            tileA[threadIdx.y][threadIdx.x] = d_M[alongRow * K + Kcol];
         }
         else
         {
             tileA[threadIdx.y][threadIdx.x] = 0.0f;
         }
 
-        Krow = t * TILE_SIZE + threadIdx.y;
+        int Krow = t * TILE_SIZE + threadIdx.y;
         if(Krow < K && alongCol < N)
         {
-            tileB[threadIdx.y][threadIdx.x] = d_N[Krow * N + col];
+            tileB[threadIdx.y][threadIdx.x] = d_N[Krow * N + alongCol];
         }
         else
         {
@@ -46,9 +46,9 @@ __global__ void matmul(float* d_M, float* d_N, float* d_P, int M, int N,
 
         __syncthreads();
 
-        if(row < M && col < N)
+        if(alongRow < M && alongCol < N)
         {
-            d_P[row * N + col] = value;
+            d_P[alongRow * N + alongCol] = value;
         }
     }
 }
@@ -94,14 +94,14 @@ int main()
     cudaMemcpy(d_N, h_N, N_size, cudaMemcpyHostToDevice);
 
     dim3 blockDim(TILE_SIZE, TILE_SIZE);     // 1024 threads
-    gridDimX = (N + TILE_SIZE - 1) / TILE_SIZE
-    gridDimY = (M + TILE_SIZE - 1) / TILE_SIZE
+    gridDimX = (N + TILE_SIZE - 1) / TILE_SIZE;
+    gridDimY = (M + TILE_SIZE - 1) / TILE_SIZE;
     dim3 gridDim(gridDimX, gridDimY);
     // This is because there are N columns when moving along the X-axis & N
     // rows when moving along the Y-axis. 
     // X-axis: ()
 
-    matmul<<<gridDim, blockDim>>()
+    matmul<<<gridDim, blockDim>>(d_M, d_N, d_P, M, N, K);
     cudaDeviceSynchronize();
 
     CHECK_CUDA(cudaFree(d_M));
@@ -110,9 +110,9 @@ int main()
     free(h_M);
     free(h_N);
 
-    *h_P = (float*) malloc(P_size);
+    h_P = (float*) malloc(P_size);
     cudaMemcpy(h_P, d_P, P_size, cudaMemcpyDeviceToHost);
     CHECK_CUDA(cudaFree(d_P));
-    free(h_P)
+    free(h_P);
 
 }
