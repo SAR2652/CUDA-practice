@@ -13,7 +13,7 @@ __global__ void matmul(float* d_M, float* d_N, float* d_P, int M, int N,
     int alongCol = blockIdx.x * TILE_SIZE + threadIdx.x;
 
     float value = 0.0f;
-    Kdim = (K + TILE_SIZE - 1) / TILE_SIZE;
+    int Kdim = (K + TILE_SIZE - 1) / TILE_SIZE;
 
     for(int t = 0; t < Kdim; t++)
     {
@@ -94,8 +94,8 @@ int main()
     cudaMemcpy(d_N, h_N, N_size, cudaMemcpyHostToDevice);
 
     dim3 blockDim(TILE_SIZE, TILE_SIZE);     // 1024 threads
-    gridDimX = (N + TILE_SIZE - 1) / TILE_SIZE;
-    gridDimY = (M + TILE_SIZE - 1) / TILE_SIZE;
+    int gridDimX = (N + TILE_SIZE - 1) / TILE_SIZE;
+    int gridDimY = (M + TILE_SIZE - 1) / TILE_SIZE;
     dim3 gridDim(gridDimX, gridDimY);
     // This is because there are N columns when moving along the X-axis & N
     // rows when moving along the Y-axis. 
