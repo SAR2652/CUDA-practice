@@ -53,8 +53,7 @@ int main()
 
     int *d_in, *d_out;
     CHECK_CUDA(cudaMalloc((void **) &d_in, size));
-    CHECK_CUDA(cudaMalloc((void **) &d_out,
-    ((N + threadsPerBlock - 1) / threadsPerBlock) * sizeof(int)));
+    CHECK_CUDA(cudaMalloc((void **) &d_out, blocksPerGrid * sizeof(int)));
 
     CHECK_CUDA(cudaMemcpy(d_in, h_in, size, cudaMemcpyHostToDevice));
     reduceSum<<<blocksPerGrid, threadsPerBlock, dynamicSharedMemorySize>>>(
