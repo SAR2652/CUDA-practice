@@ -10,3 +10,6 @@ vector_add:
 
 matmul:
 	$(NVCC) $(ARCH_T4) -o matmul matmul.cu
+
+reduceSum:
+	$(NVCC) $(ARCH_T4) -o reduceSum reduceSum.cu
