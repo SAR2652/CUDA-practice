@@ -62,7 +62,7 @@ int main()
     );
 
     CHECK_CUDA(cudaMemcpy(h_out, d_out, blocksPerGrid * sizeof(int),
-        cudaMemcpyHostToDevice));
+        cudaMemcpyDeviceToHost));
 
     unsigned long long sum = 0;
     for(int i = 0; i < blocksPerGrid; i++)
