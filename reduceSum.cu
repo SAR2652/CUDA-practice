@@ -5,8 +5,9 @@
 
 __global__ void reduceSum(int* input, int* output, int N)
 {
-    // it is possible to dynamically allocate shared memory
-    __shared__ int sdata[];
+    // This array lives in dynamic shared memory, its size will be provided
+    // at runtime, not at compile time.
+    extern __shared__ int sdata[];
 
     unsigned int tid = threadIdx.x;
     unsigned int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -46,6 +47,8 @@ int main()
 
     int threadsPerBlock = 256;
     int blocksPerGrid = (N + threadsPerBlock - 1) / threadsPerBlock;
+
+    int *h_out = new int[blocksPerGrid];
     int dynamicSharedMemorySize = threadsPerBlock * sizeof(int);
 
     int *d_in, *d_out;
@@ -58,7 +61,7 @@ int main()
         d_in, d_out, N
     );
 
-    CHECK_CUDA(cudaMemcpy(h_out, d_out, dynamicSharedMemorySize,
+    CHECK_CUDA(cudaMemcpy(h_out, d_out, blocksPerGrid * sizeof(int),
         cudaMemcpyHostToDevice));
 
     unsigned long long sum = 0;
@@ -67,7 +70,7 @@ int main()
         sum += h_out[i];
     }
 
-    printf("Sum = %d", sum);
+    printf("Sum = %lld", sum);
 
     CHECK_CUDA(cudaFree(d_in));
     CHECK_CUDA(cudaFree(d_out));
