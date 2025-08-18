@@ -9,14 +9,18 @@ __global__ void matmul(float* d_M, float* d_N, float* d_P, int M, int N,
     __shared__ int tileA[TILE_SIZE][TILE_SIZE];
     __shared__ int tileB[TILE_SIZE][TILE_SIZE];
 
+    // y goes left to right and x goes up to down
     int alongRow = blockIdx.y * TILE_SIZE + threadIdx.y;
     int alongCol = blockIdx.x * TILE_SIZE + threadIdx.x;
 
     float value = 0.0f;
+
+    // sliding window of size K / size of tile
     int Kdim = (K + TILE_SIZE - 1) / TILE_SIZE;
 
     for(int t = 0; t < Kdim; t++)
     {
+        // First matrix dimension is M x K (K is column dim)
         int Kcol = t * TILE_SIZE + threadIdx.x; 
         if(alongRow < M && Kcol < K)
         {
@@ -27,6 +31,7 @@ __global__ void matmul(float* d_M, float* d_N, float* d_P, int M, int N,
             tileA[threadIdx.y][threadIdx.x] = 0.0f;
         }
 
+        // Second matrix dimension is K x N (K is row dim)
         int Krow = t * TILE_SIZE + threadIdx.y;
         if(Krow < K && alongCol < N)
         {
@@ -94,10 +99,11 @@ int main()
     cudaMemcpy(d_N, h_N, N_size, cudaMemcpyHostToDevice);
 
     dim3 blockDim(TILE_SIZE, TILE_SIZE);     // 1024 threads
+    // ensures 1 extra block than divisible in order to accomodate offset
     int gridDimX = (N + TILE_SIZE - 1) / TILE_SIZE;
     int gridDimY = (M + TILE_SIZE - 1) / TILE_SIZE;
     dim3 gridDim(gridDimX, gridDimY);
-    // This is because there are N columns when moving along the X-axis & N
+    // This is because there are N columns when moving along the X-axis & M
     // rows when moving along the Y-axis. 
     // X-axis: ()
 
