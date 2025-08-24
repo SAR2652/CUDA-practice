@@ -30,7 +30,7 @@ __global__ void reduceMinMax(int* input, int* output_min, int* output_max,
         __syncthreads();
     }
 
-    if(tid = 0)
+    if(tid == 0)
     {
         output_min[blockIdx.x] = sdata_min[0];
         output_max[blockIdx.x] = sdata_max[0];
