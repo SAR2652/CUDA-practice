@@ -69,17 +69,16 @@ int main()
     CHECK_CUDA(cudaMalloc((void **) &d_out_max, blocksPerGrid * sizeof(int)));
 
     CHECK_CUDA(cudaMemcpy(d_in, h_in, size, cudaMemcpyHostToDevice));
-    reduceMinMax<<<blocksPerGrid, threadsPerBlock, dynamicSharedMemorySize>>>(
-        d_in, d_out_min, d_out_max, N
-    );
+    reduceMinMax<<<blocksPerGrid, threadsPerBlock,
+    2 * dynamicSharedMemorySize>>>(d_in, d_out_min, d_out_max, N);
 
     int *h_out_min = new int[blocksPerGrid];
     int *h_out_max = new int[blocksPerGrid];
 
     CHECK_CUDA(cudaMemcpy(h_out_min, d_out_min, blocksPerGrid * sizeof(int),
-               cudaMemcpyHostToDevice));
+               cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(h_out_max, d_out_max, blocksPerGrid * sizeof(int),
-               cudaMemcpyHostToDevice));
+               cudaMemcpyDeviceToHost));
 
     int minimum = INT32_MAX;
     int maximum = INT32_MIN;
