@@ -13,3 +13,6 @@ matmul:
 
 reduceSum:
 	$(NVCC) $(ARCH_T4) -o reduceSum reduceSum.cu
+
+reduceMinMax:
+	$(NVCC) $(ARCH_T4) -o reduceMinMax reduceMinMax.cu
