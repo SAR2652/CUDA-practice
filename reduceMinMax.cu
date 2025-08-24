@@ -3,10 +3,11 @@
 #include <cstdlib>
 #include "cuda_utils.h"
 
-__global__ reduceMinMax(int* input, int* output_min, int* output_max, int N)
+__global__ void reduceMinMax(int* input, int* output_min, int* output_max,
+                             int N)
 {
     extern __shared__ int sdata_min[];
-    extern __shared__ int sdata_max[]
+    extern __shared__ int sdata_max[];
 
     int tid = threadIdx.x;
     int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -68,7 +69,8 @@ int main()
         d_in, d_out_min, d_out_max, N
     );
 
-    int *h_out_min, *h_out_max;
+    int *h_out_min = new int[blocksPerGrid];
+    int *h_out_max = new int[blocksPerGrid];
 
     CHECK_CUDA(cudaMemcpy(h_out_min, d_out_min, blocksPerGrid * sizeof(int),
                cudaMemcpyHostToDevice));
