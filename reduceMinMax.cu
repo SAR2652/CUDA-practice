@@ -1,20 +1,26 @@
 #include <stdio.h>
+#include <limits.h>
 #include <random>
 #include <cstdlib>
+#include <algorithm>
 #include "cuda_utils.h"
 
 __global__ void reduceMinMax(int* input, int* output_min, int* output_max,
                              int N)
 {
-    extern __shared__ int sdata_min[];
-    extern __shared__ int sdata_max[];
+    // You can allocate only one shared variable
+    extern __shared__ int sdata[];
+
+    // Therefore allocate 2X dynamic shared memory size and manually split it
+    int* sdata_min = sdata;
+    int* sdata_max = sdata + blockDim.x;
 
     int tid = threadIdx.x;
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     // Assign all values in a block to shared memory
-    sdata_min[tid] = (i < N) ? input[i]: 0;
-    sdata_max[tid] = (i < N) ? input[i]: 0;
+    sdata_min[tid] = (i < N) ? input[i]: INT_MAX;
+    sdata_max[tid] = (i < N) ? input[i]: INT_MIN;
 
     __syncthreads();
 
@@ -22,10 +28,8 @@ __global__ void reduceMinMax(int* input, int* output_min, int* output_max,
     {
         if(tid < stride)
         {
-            sdata_min[tid] = (sdata_min[tid] < sdata_min[tid + stride]) ? 
-            sdata_min[tid]: sdata_min[tid + stride];
-            sdata_max[tid] = (sdata_max[tid] > sdata_max[tid + stride]) ?
-            sdata_max[tid]: sdata_max[tid + stride];
+            sdata_min[tid] = min(sdata_min[tid], sdata_min[tid + stride]);
+            sdata_max[tid] = max(sdata_max[tid], sdata_max[tid + stride]);
         }
         __syncthreads();
     }
